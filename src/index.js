@@ -11,12 +11,12 @@ export default {
       return await handleGetLink(request);
     }
 
-    // 📌 Route: /newgame (GET/POST)
+    // 📌 Route: /newgame (GET or POST)
     if (url.pathname === "/newgame") {
       return await handleNewGame(request);
     }
 
-    // 📌 Route: /fotbal (GET/POST)
+    // 📌 Route: /fotbal (GET or POST)
     if (url.pathname === "/fotbal") {
       return await handleFotbal(request);
     }
@@ -24,4 +24,3 @@ export default {
     return new Response("Not Found", { status: 404 });
   },
 };
-  
