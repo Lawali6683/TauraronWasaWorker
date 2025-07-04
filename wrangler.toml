@@ -1,3 +1,4 @@
 name = "worker33"
 main = "src/index.js"
-compatibility_date = "2025-07-04"
+compatibility_date = "2024-07-01"
+type = "module"
