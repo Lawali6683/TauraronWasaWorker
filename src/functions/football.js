@@ -34,7 +34,7 @@ export default {
         }
 
         // --- Football API Handler ---
-        if (pathname === '/football-results') {
+        if (pathname === '/football') {
             try {
                 const {
                     date,
@@ -115,83 +115,4 @@ export default {
             }
         }
 
-        // --- Sarki Comment Handler ---
-        if (pathname === '/sarkiCommet.js') {
-            try {
-                const payload = await request.json();
-                const vercelUrl = 'https://tauraron-wasa-admin.vercel.app/api/sarki';
-                const vercelApiKey = '@haruna66'; // Ka bar wannan kamar yadda yake
-
-                const vercelResponse = await fetch(vercelUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': vercelApiKey
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (vercelResponse.ok) {
-                    const result = await vercelResponse.json();
-                    return new Response(JSON.stringify(result), {
-                        status: 200,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                } else {
-                    const errorText = await vercelResponse.text();
-                    return new Response(JSON.stringify({
-                        error: `Vercel API returned status ${vercelResponse.status}: ${errorText}`
-                    }), {
-                        status: vercelResponse.status,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error("Error in sarkiCommet.js worker:", error);
-                return new Response(JSON.stringify({
-                    error: "Internal Server Error"
-                }), {
-                    status: 500,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
-        }
-
-        // --- User Notification Handler ---
-        if (pathname === '/userNotification') {
-            try {
-                const payload = await request.json();
-                console.log("Notification payload received:", payload);
-                return new Response("Notification request received successfully.", {
-                    status: 200,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            } catch (error) {
-                console.error("Error in userNotification worker:", error);
-                return new Response(JSON.stringify({
-                    error: "Internal Server Error"
-                }), {
-                    status: 500,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
-        }
-
-        return new Response('Not Found', {
-            status: 404,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    }
-};
+       
