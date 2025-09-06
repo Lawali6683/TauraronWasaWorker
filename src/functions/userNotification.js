@@ -1,19 +1,14 @@
-
-import {
-    json
-} from 'https://unpkg.com/@cloudflare/workers-json-response@1.0.0';
+import { json } from 'https://unpkg.com/@cloudflare/workers-json-response@1.0.0';
 import webpush from 'https://cdn.jsdelivr.net/npm/web-push@4.1.1/src/web-push.js';
 
-
+// 🔑 Hardcoded VAPID keys (canza da naka!)
+const VAPID_PUBLIC_KEY = "BHKKgIF0DdjV9XXxXGI7MXQA_scnU0OxDP80OtZSlZyD02gSJY6aRYPxOS32bBP-wgjWAJr5VP4pDMYat38LGYc";
+const VAPID_PRIVATE_KEY = "oixOsctNeUMNwmGfMTAb4Y96fXDChzbzNWls1maPb54";
 
 export default {
-    async fetch(request, env) {
+    async fetch(request) {
         if (request.method !== 'POST') {
-            return json({
-                error: 'Method Not Allowed'
-            }, {
-                status: 405
-            });
+            return json({ error: 'Method Not Allowed' }, { status: 405 });
         }
 
         const url = new URL(request.url);
@@ -35,19 +30,16 @@ export default {
                 if (!recipientSubscription || !title) {
                     return json({
                         error: 'Missing required fields: recipientSubscription, title'
-                    }, {
-                        status: 400
-                    });
+                    }, { status: 400 });
                 }
 
-                // Saita VAPID details
+                // 🟢 Set VAPID details kai tsaye
                 webpush.setVapidDetails(
-                    'mailto:TauraronWasa.com', 
-                    env.VAPID_PUBLIC_KEY,
-                    env.VAPID_PRIVATE_KEY
+                    'mailto:tauraronwasa@gmail.com',
+                    VAPID_PUBLIC_KEY,
+                    VAPID_PRIVATE_KEY
                 );
 
-                const subscription = recipientSubscription;
                 const notificationPayload = {
                     title,
                     body,
@@ -56,35 +48,24 @@ export default {
                     url: notificationUrl
                 };
 
-                // Tura sanarwar zuwa ga mai amfani
+                // 📨 Tura sanarwar
                 await webpush.sendNotification(
-                    subscription,
-                    JSON.stringify(notificationPayload), {
-                        headers: {
-                            'Urgency': 'high'
-                        }
-                    }
+                    recipientSubscription,
+                    JSON.stringify(notificationPayload),
+                    { headers: { 'Urgency': 'high' } }
                 );
 
-                return json({
-                    message: `Notification sent to ${recipientFullName}`
-                });
+                return json({ message: `Notification sent to ${recipientFullName}` });
 
             } catch (error) {
                 console.error("Error sending notification:", error);
                 return json({
                     error: 'Failed to send notification',
                     details: error.message
-                }, {
-                    status: 500
-                });
+                }, { status: 500 });
             }
         }
 
-        return json({
-            error: 'Not Found'
-        }, {
-            status: 404
-        });
+        return json({ error: 'Not Found' }, { status: 404 });
     }
 };
