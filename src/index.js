@@ -1,6 +1,6 @@
 import { handleGetLink } from "./functions/getLink.js";
 import { handleNewGame } from "./functions/newgame.js";
-import { handleFotbal } from "./functions/fotbal.js";
+import { handleFotbal } from "./functions/footbal.js";
 import { handleChampions } from "./functions/champions.js";
 import { handleEropa } from "./functions/eropa.js";
 import { handleFa } from "./functions/fa.js";
@@ -15,91 +15,102 @@ import { handleSite6 } from "./functions/site6.js";
 import { handleTranslate } from "./functions/translate.js";
 import { handleUserNotification } from "./functions/userNotification.js";
 
+// Domains masu izini
+const ALLOWED_ORIGINS = [
+    'https://tauraronwasa.pages.dev',
+    'https://leadwaypeace.pages.dev',
+    'http://localhost:8080'
+];
+
+// Helper don bada response da CORS headers
+function withCORSHeaders(response, request) {
+    const origin = request.headers.get('Origin');
+    if (ALLOWED_ORIGINS.includes(origin)) {
+        response.headers.set('Access-Control-Allow-Origin', origin);
+    }
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    return response;
+}
+
 export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
+    async fetch(request, env, ctx) {
+        // ✅ Gyara 1: A fara sarrafa kiran OPTIONS kafin komai
+        if (request.method === 'OPTIONS') {
+            const origin = request.headers.get('Origin');
+            if (ALLOWED_ORIGINS.includes(origin)) {
+                return withCORSHeaders(new Response(null, { status: 204 }), request);
+            }
+            return new Response(null, { status: 403 }); // 403 Forbidden idan ba a cikin jerin domains ba
+        }
 
-    // 📌 Route: /getLink (POST file upload)
-    if (url.pathname === "/getLink" && request.method === "POST") {
-      return await handleGetLink(request);
-    }
+        const url = new URL(request.url);
 
-    // 📌 Route: /newgame
-    if (url.pathname === "/newgame") {
-      return await handleNewGame(request);
-    }
+        // ✅ Gyara 2: Duba API Key a farko
+        const WORKER_API_KEY = request.headers.get('x-api-key');
+        if (WORKER_API_KEY !== '@haruna66') {
+            const forbiddenResponse = new Response('Invalid API Key', { status: 401 });
+            return withCORSHeaders(forbiddenResponse, request);
+        }
 
-    // 📌 Route: /fotbal
-    if (url.pathname === "/fotbal") {
-      return await handleFotbal(request);
-    }
+        let response;
+        // 📌 Routes
+        switch (url.pathname) {
+            case "/getLink":
+                response = await handleGetLink(request);
+                break;
+            case "/newgame":
+                response = await handleNewGame(request);
+                break;
+            case "/football":
+                response = await handleFotbal(request);
+                break;
+            case "/champions":
+                response = await handleChampions(request);
+                break;
+            case "/eropa":
+                response = await handleEropa(request);
+                break;
+            case "/fa":
+                response = await handleFa(request);
+                break;
+            case "/football":
+                response = await handleFootball(request);
+                break;
+            case "/labarinWasa":
+                response = await handleLabarinWasa(request);
+                break;
+            case "/laliga":
+                response = await handleLaliga(request);
+                break;
+            case "/npfl":
+                response = await handleNpfl(request);
+                break;
+            case "/premier":
+                response = await handlePremier(request);
+                break;
+            case "/search":
+                response = await handleSearch(request);
+                break;
+            case "/siriyaa":
+                response = await handleSiriyaa(request);
+                break;
+            case "/site6":
+                response = await handleSite6(request);
+                break;
+            case "/translate":
+                response = await handleTranslate(request);
+                break;
+            case "/userNotification":
+                response = await handleUserNotification(request);
+                break;
+            default:
+                response = new Response("Not Found", { status: 404 });
+                break;
+        }
 
-    // 📌 Route: /champions
-    if (url.pathname === "/champions") {
-      return await handleChampions(request);
-    }
-
-    // 📌 Route: /eropa
-    if (url.pathname === "/eropa") {
-      return await handleEropa(request);
-    }
-
-    // 📌 Route: /fa
-    if (url.pathname === "/fa") {
-      return await handleFa(request);
-    }
-
-    // 📌 Route: /football
-    if (url.pathname === "/football") {
-      return await handleFootball(request);
-    }
-
-    // 📌 Route: /labarinWasa
-    if (url.pathname === "/labarinWasa") {
-      return await handleLabarinWasa(request);
-    }
-
-    // 📌 Route: /laliga
-    if (url.pathname === "/laliga") {
-      return await handleLaliga(request);
-    }
-
-    // 📌 Route: /npfl
-    if (url.pathname === "/npfl") {
-      return await handleNpfl(request);
-    }
-
-    // 📌 Route: /premier
-    if (url.pathname === "/premier") {
-      return await handlePremier(request);
-    }
-
-    // 📌 Route: /search
-    if (url.pathname === "/search") {
-      return await handleSearch(request);
-    }
-
-    // 📌 Route: /siriyaa
-    if (url.pathname === "/siriyaa") {
-      return await handleSiriyaa(request);
-    }
-
-    // 📌 Route: /site6
-    if (url.pathname === "/site6") {
-      return await handleSite6(request);
-    }
-
-    // 📌 Route: /translate
-    if (url.pathname === "/translate") {
-      return await handleTranslate(request);
-    }
-
-    // 📌 Route: /userNotification
-    if (url.pathname === "/userNotification") {
-      return await handleUserNotification(request);
-    }
-
-    // Default: 404
-    return new Response("Not Found", { status: 404 });
-  },
+       
+        return withCORSHeaders(response, request);
+    },
 };
